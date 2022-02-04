@@ -169,7 +169,12 @@ module.exports.run = buildOpts => {
                 extraConfig += `CODE_SIGN_RESOURCE_RULES_PATH = ${buildOpts.codeSignResourceRules}\n`;
             }
             if (buildOpts.provisioningProfile) {
-                extraConfig += `PROVISIONING_PROFILE = ${buildOpts.provisioningProfile}\n`;
+                if (typeof buildOpts.provisioningProfile === 'string') {
+                    extraConfig += `PROVISIONING_PROFILE = ${buildOpts.provisioningProfile}\n`;
+                } else {
+                    const keys = Object.keys(buildOpts.provisioningProfile);
+                    extraConfig += `PROVISIONING_PROFILE = ${buildOpts.provisioningProfile[keys[0]]}\n`;
+                }
             }
             if (buildOpts.developmentTeam) {
                 extraConfig += `DEVELOPMENT_TEAM = ${buildOpts.developmentTeam}\n`;
@@ -232,7 +237,12 @@ module.exports.run = buildOpts => {
             }
 
             if (buildOpts.provisioningProfile && bundleIdentifier) {
-                exportOptions.provisioningProfiles = { [bundleIdentifier]: String(buildOpts.provisioningProfile) };
+                if (typeof buildOpts.provisioningProfile === 'string') {
+                    exportOptions.provisioningProfiles = { [bundleIdentifier]: String(buildOpts.provisioningProfile) };
+                } else {
+                    events.emit('log', 'Multiple provisioning profiles detected, setting...');
+                    exportOptions.provisioningProfiles = buildOpts.provisioningProfile;
+                }
                 exportOptions.signingStyle = 'manual';
             }
 
